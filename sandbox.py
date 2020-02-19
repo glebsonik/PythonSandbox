@@ -1,6 +1,7 @@
 import pandas as pd
 import scipy as scp
 from scipy.stats import spearmanr
+import xlwt
 
 # test_series = pd.Series([1, 1, 3, 1, 5])
 # test_series[test_series == 1] = 9
@@ -61,16 +62,26 @@ conv_map = {
     '31-59': 2,
     '0-30': 1
 }
-mini_conv = {
-    'v13': 4,
-    'v22': 89
-}
 data = pd.read_csv('seps_utf.csv', ';')
 data = data[data.columns.drop(list(data.filter(regex='Unnamed')))]
+data = data.drop(['Оценка', 'Группа'], 1)
 data = data.dropna()
 data = data.applymap(lambda el: conv_map.get(el, 5))
-for row in data.items():
-    print(row)
+i = 0
+j = 0
+correlation_res = []
+for up_row in data.items():
+    row_res = []
+    # print(up_row[0])
+    for left_row in data.items():
+        cf, p = spearmanr(up_row[1], left_row[1])
+        row_res.append((round(cf, 4), round(p, 4)))
+    correlation_res.append(row_res)
+# print(correlation_res)
+res_data = pd.DataFrame(correlation_res)
+res_data = res_data.rename(columns=lambda x: data.columns[x], index=lambda x: data.columns[x])
+res_data.to_csv(r'testing.csv')
+res_data.to_excel('testing_x.xls')
 # data = pd.DataFrame({'k1': ['v11', 'v12', 'v13'], 'k2': ['v21', 'v22', 'v23'], 'k3': ['v31', 'v32', 'v33'], 'k4': ['v41', 'v42', 'v43']})
 # i = 0
 # for top_items in data.items():
@@ -79,11 +90,11 @@ for row in data.items():
 #     i+=1
     # for left_items in data.items():
     #     coef, p = spearmanr()
-m1 = [1, 2, 3, 4]
-m2 = [2, 3, 4, 5]
+m1 = pd.Series([1, 2, 3, 4])
+m2 = pd.Series([2, 3, 4, 5])
 
 # cf, p = spearmanr(m1, m2)
-# print(cf)
+# print((cf, p))
 # print(p)
 # i = 0
 # for s in data.values:
